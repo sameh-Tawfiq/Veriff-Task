@@ -1,0 +1,11 @@
+kind: Service
+metadata:
+  name: juice-shop
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: juice-shop
