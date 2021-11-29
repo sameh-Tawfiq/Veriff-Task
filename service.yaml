@@ -9,3 +9,4 @@ spec:
     name: http
   selector:
     app: juice-shop
+

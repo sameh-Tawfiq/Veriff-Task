@@ -1,4 +1,5 @@
-The below step to create K8s cluster of 1 master node and 1 worker node using kubeadm on CentOS 7.
+The below steps to create K8s cluster of 1 master node and 1 worker node using kubeadm on CentOS 7.
+
 1- Create 2 machines that can reach to each other through network and can resolve the hostname for each other either using DNS or the hosts file.
 2- As a prerequest of K8s, install Docker on master and worker nodes following the below steps.
    a. Update Docker Package Database

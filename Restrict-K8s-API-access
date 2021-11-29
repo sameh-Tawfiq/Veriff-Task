@@ -1,4 +1,4 @@
-2 ways listed here to restrict access to K8s API to specific number of IP addresses.
+There are 2 ways listed here to restrict access to K8s API to specific number of IP addresses.
 
 Way #1
 1- Allow access to the K8s API port from only specifc IP addresses via firewall rules.
@@ -7,8 +7,8 @@ Way #1
       $ sudo firewall-cmd --reload
  
  
- Way #2
- 2- Allow access to the K8s API port only via Kubectl proxy while no direct access to K8s API port is allowed via firewall.
+Way #2
+2- Allow access to the K8s API port only via Kubectl proxy while no direct access to K8s API port is allowed via firewall.
     a. Run the below command on the master node.
        $ kubectl proxy --address='192.168.66.195'  --accept-hosts='127.0.0.1,192.168.66.195,192.168.66.0/32'
     b. Add kube config file to the source machine as the below example to allow access to K8s API via the proxy port of 8001 instaed of 6443 and http instead of https as the running proxy accepts http only.

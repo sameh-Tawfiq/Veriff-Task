@@ -27,3 +27,4 @@ spec:
                 name: juice-shop
                 port:
                   number: 80
+
