@@ -1,0 +1,92 @@
+The below step to create K8s cluster of 1 master node and 1 worker node using kubeadm on CentOS 7.
+1- Create 2 machines that can reach to each other through network and can resolve the hostname for each other either using DNS or the hosts file.
+2- As a prerequest of K8s, install Docker on master and worker nodes following the below steps.
+   a. Update Docker Package Database
+      $ sudo yum check-update
+
+   b. Install the Dependencies
+      $ sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+
+   c. Add the Docker Repository to CentOS
+      $ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+   d. Install Docker On CentOS Using Yum
+      $ sudo yum install -y docker
+
+   e. Start Docker:
+      $ sudo systemctl start docker
+
+   f. Enable Docker:
+      $ sudo systemctl enable docker
+
+   g. Check the status of the service with:
+      $ sudo systemctl status docker
+
+3- Install K8s
+   a. Configure Kubernetes Repository on master and worker nodes
+      $ sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      EOF
+   
+   b. Install kubelet, kubeadm and kubectl on master and worker nodes
+      $ sudo yum install -y kubelet kubeadm kubectl
+      $ sudo systemctl enable kubelet
+      $ sudo systemctl start kubelet
+   c. Configure Firewall on master node as below
+      $ sudo firewall-cmd --permanent --add-port=2379-2380/tcp
+      $ sudo firewall-cmd --permanent --add-port=10250/tcp
+      $ sudo firewall-cmd --permanent --add-port=10251/tcp
+      $ sudo firewall-cmd --permanent --add-port=10252/tcp
+      $ sudo firewall-cmd --permanent --add-port=10255/tcp
+      $ sudo firewall-cmd --zone=k8s-api --add-source=192.168.66.0/24 --permanent   
+      $ sudo firewall-cmd --zone=k8s-api --add-port=6443/tcp --permanent  # This zone to allow K8s cluster managemnt only from it as the K8s-api port 6443 is allowed only from sources in 192.168.66.0/24
+      $ sudo firewall-cmd --reload
+    
+    d. Configure Firewall on worker node as below
+       $ sudo firewall-cmd --permanent --add-port=10251/tcp
+       $ sudo firewall-cmd --permanent --add-port=10255/tcp
+       $ sudo firewall-cmd --reload
+   
+    e. Update Iptables Settings on master and worker nodes
+       $ sudo cat <<EOF > /etc/sysctl.d/k8s.conf
+              net.bridge.bridge-nf-call-ip6tables = 1
+              net.bridge.bridge-nf-call-iptables = 1
+              EOF
+       $ sudo sysctl --system
+       
+    f. Disable SELinux on master and worker nodes
+       $ sudo setenforce 0
+       $ sudo sed -i ‘s/^SELINUX=enforcing$/SELINUX=permissive/’ /etc/selinux/config
+    
+    g. Disable SWAP on master and worker nodes
+       $ sudo sed -i '/swap/d' /etc/fstab
+       $ sudo swapoff -a
+     
+    h. Create Cluster with kubeadm by running the below commands  on master node
+       $ sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+    
+    i. Manage Cluster as Regular User by running the below commands on master node
+       $ sudo mkdir -p $HOME/.kube
+       $ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+       $ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+     
+    j. Set Up Pod Network of flannel by running the below commands on master node
+       $ sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    
+    k. Join Worker Node to Cluster
+       kubeadm join 192.168.66.195:6443 --token code_from_master --discovery-token-ca-cert-hash code_from_master                                                                                                                                                         38a5da11326c6f21e831f8
+    
+       
+       
+       
+       
+       
+   
+      
+      
